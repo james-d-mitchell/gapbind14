@@ -1,0 +1,93 @@
+#
+# gapbind14: Seamless operability between C++14 and GAP
+#
+# This file is part of the build system of a GAP kernel extension.
+# Requires GNU autoconf, GNU automake and GNU libtool.
+#
+
+dnl ##
+dnl ## Setup autoconf
+dnl ##
+AC_PREREQ([2.68])
+AC_INIT([gapbind14], m4_esyscmd([tr -d '\n' < VERSION]))
+AC_CONFIG_SRCDIR([src/gapbind14.cpp])
+AC_CONFIG_HEADER([src/pkgconfig.h:cnf/pkgconfig.h.in])
+AC_CONFIG_MACRO_DIR([cnf/m4])
+AC_CONFIG_AUX_DIR([cnf])
+
+dnl ##
+dnl ## Get canonical host info
+dnl ##
+AC_CANONICAL_HOST
+
+dnl ##
+dnl ## Setup automake
+dnl ##
+AM_INIT_AUTOMAKE([1.11 -Wall foreign subdir-objects])
+AM_SILENT_RULES([yes])
+AM_PROG_AR
+
+dnl ##
+dnl ## Set the language
+dnl ##
+AC_PROG_CXX
+AC_LANG([C++])
+
+dnl ##
+dnl ## Setup libtool (for building the GAP kernel extension)
+dnl ##
+LT_PREREQ([2.4.2])
+LT_INIT([disable-static dlopen win32-dll])
+
+dnl ##
+dnl ## Locate the GAP root dir
+dnl ##
+AC_FIND_GAP
+
+dnl ##
+dnl ## Detect pointer size to distinguish 32 and 64 bit builds
+dnl ##
+AC_CHECK_SIZEOF([void **])
+
+dnl ##
+dnl ## Detect Windows resp. Cygwin
+dnl ##
+case $host_os in
+  *cygwin* ) CYGWIN=yes;;
+         * ) CYGWIN=no;;
+esac
+AM_CONDITIONAL([SYS_IS_CYGWIN], [test "$CYGWIN" = "yes"])
+if test "$CYGWIN" = "yes"; then
+  AC_DEFINE(SYS_IS_CYGWIN32, 1, are we on CYGWIN?)
+else
+  AC_DEFINE(SYS_IS_CYGWIN32, 0, are we on CYGWIN?)
+fi
+
+dnl ##
+dnl ## Rebuild configure if VERSION file changes
+dnl ##
+AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
+
+dnl ## User setting: Debug mode (off by default)
+AC_ARG_ENABLE([debug],
+    [AS_HELP_STRING([--enable-debug], [enable debug mode])],
+    [AC_DEFINE([KERNEL_DEBUG], [1], [define if building in debug mode])],
+    [enable_debug=no]
+    )
+AC_MSG_CHECKING([whether to enable debug mode])
+AC_MSG_RESULT([$enable_debug])
+
+## TODO check that the compiler supports these flags
+AS_IF([test "x$enable_debug" = xyes],
+    [AC_SUBST(CXXFLAGS, '-g3 -O0 -Wall -Wextra -Wno-unused-parameter -Wtype-limits -Wformat-security -Wpointer-arith -Wno-div-by-zero -Wreturn-type -Wswitch -Wsizeof-array-argument -Wunused-label -fno-omit-frame-pointer -Wno-c++11-extensions -Wshadow -Wint-conversion')])
+
+AS_IF([test "x$enable_debug" = xyes],
+    [AC_SUBST(CFLAGS, '-g3 -O0 -Wall -Wextra -Wno-unused-parameter -Wtype-limits -Wformat-security -Wpointer-arith -Wno-div-by-zero -Wreturn-type -Wswitch -Wsizeof-array-argument -Wunused-label -fno-omit-frame-pointer -Wshadow -Wint-conversion')])
+
+AM_CONDITIONAL([KERNEL_DEBUG], [test "x$enable_debug" = xyes])
+
+dnl ##
+dnl ## Output everything
+dnl ##
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
