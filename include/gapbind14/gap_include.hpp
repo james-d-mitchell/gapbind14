@@ -1,6 +1,6 @@
 //
-// gapbind14 package for GAP
-// Copyright (C) 2018 James D. Mitchell
+// gapbind14 for GAP
+// Copyright (C) 2020 James D. Mitchell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,8 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+//
 
-#include "to_gap.hpp"
+// Include gmp.h *before* switching to C mode, because GMP detects when
+// compiled from C++ and then does some things differently, which would
+// cause an error if called from within extern "C". But libsing.h
+// (indirectly) includes gmp.h ...
 
-namespace gapbind14 {
-}  // namespace gapbind14
+#ifndef INCLUDE_GAPBIND14_GAP_INCLUDE_HPP_
+#define INCLUDE_GAPBIND14_GAP_INCLUDE_HPP_
+
+#include <gmp.h>
+
+extern "C" {
+#include "compiled.h"
+}
+
+#endif  // INCLUDE_GAPBIND14_GAP_INCLUDE_HPP_

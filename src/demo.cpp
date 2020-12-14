@@ -1,6 +1,6 @@
 //
-// gapbind14 package for GAP
-// Copyright (C) 2018 James D. Mitchell
+// gapbind14
+// Copyright (C) 2020 James D. Mitchell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "gapbind14.hpp"
+#include "gapbind14/gapbind14.hpp"
 
 void testing1() {
   std::cout << "it works\n";
@@ -57,10 +57,7 @@ GAPBIND14_FUNCTION(m,
                    testing4,
                    testing4,
                    gapbind14::overload_cast<std::string>);
-GAPBIND14_FUNCTION(m,
-                   testing4,
-                   testing5,
-                   gapbind14::overload_cast<int>);
+GAPBIND14_FUNCTION(m, testing4, testing5, gapbind14::overload_cast<int>);
 GAPBIND14_FUNCTION(m, testing6, testing6);
 GAPBIND14_FUNCTION(m, testing7, testing7);
 
@@ -85,26 +82,6 @@ struct Pet {
 };
 
 GAPBIND14_CLASS(m, Pet);
-GAPBIND14_CLASS_CONSTRUCTOR(m,
-                            Pet,
-                            create,
-                            gapbind14::to_cpp<std::string>);
+GAPBIND14_CLASS_CONSTRUCTOR(m, Pet, create, gapbind14::to_cpp<std::string>);
 GAPBIND14_CLASS_MEM_FN(m, Pet, terminate, terminate);
 GAPBIND14_CLASS_MEM_FN(m, Pet, getName, getName);
-// TODO GAPBIND14_CLASS_PRINT(m, Pet, getName);
-//
-/*GAPBIND14_CLASS_METHOD(m, Pet, getName, "getName", to_gap_string, to_cpp_void);
-GAPBIND14_CLASS_METHOD(m, Pet, setName, "setName", to_gap_void, to_cpp_string);
-GAPBIND14_CLASS_METHOD(m,
-                       Pet,
-                       getName2,
-                       "getName2",
-                       to_gap_string,
-                       to_cpp_string);
-GAPBIND14_CLASS_METHOD(m,
-                       Pet,
-                       terminate,
-                       "terminate",
-                       to_gap_void,
-                       to_cpp_void);
-*/
