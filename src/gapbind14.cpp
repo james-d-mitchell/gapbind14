@@ -114,17 +114,16 @@ static void SetupFuncInfo(Obj func, const Char *cookie) {
 ////////////////////////////////////////////////////////////////////////
 
 static Int InitKernel(StructInitInfo *module) {
-
   InitHdlrFuncsFromTable(MODULE.funcs());
 
   for (auto ptr : MODULE) {
     InitHdlrFuncsFromTable(MODULE.mem_funcs(ptr->name()));
   }
 
-  UInt& T_GAPBIND14_OBJ = gapbind14::T_GAPBIND14_OBJ;
+  UInt &T_GAPBIND14_OBJ = gapbind14::T_GAPBIND14_OBJ;
   T_GAPBIND14_OBJ = RegisterPackageTNUM("TGapBind14", TGapBind14ObjTypeFunc);
 
-  InfoBags[T_GAPBIND14_OBJ].name = "gapbind14 C++ object wrapper";
+  // InfoBags[T_GAPBIND14_OBJ].name = "gapbind14 C++ object wrapper";
 
   PrintObjFuncs[T_GAPBIND14_OBJ] = TGapBind14ObjPrintFunc;
   SaveObjFuncs[T_GAPBIND14_OBJ]  = TGapBind14ObjSaveFunc;
@@ -148,9 +147,8 @@ static Int InitKernel(StructInitInfo *module) {
 ////////////////////////////////////////////////////////////////////////
 
 static Int InitLibrary(StructInitInfo *module) {
-
   // InitGVarFuncsFromTable(MODULE.gvar_funcs());
-  StructGVarFunc const* tab = MODULE.funcs();
+  StructGVarFunc const *tab = MODULE.funcs();
 
   // init functions from MODULE in the record named MODULE.module_name()
   // This is done to avoid polluting the global namespace
@@ -166,7 +164,7 @@ static Int InitLibrary(StructInitInfo *module) {
     AssPRec(global_rec, RNamName(tab[i].name), func);
   }
   for (auto ptr : MODULE) {
-    tab = MODULE.mem_funcs(ptr->name());
+    tab           = MODULE.mem_funcs(ptr->name());
     Obj class_rec = NEW_PREC(0);
     SET_LEN_PREC(class_rec, 0);
 
@@ -191,9 +189,9 @@ static Int InitLibrary(StructInitInfo *module) {
 ////////////////////////////////////////////////////////////////////////
 
 static StructInitInfo module = {
-    .type = MODULE_DYNAMIC,
-    .name = MODULE.module_name(),
-    .initKernel = InitKernel,
+    .type        = MODULE_DYNAMIC,
+    .name        = MODULE.module_name(),
+    .initKernel  = InitKernel,
     .initLibrary = InitLibrary,
 };
 
