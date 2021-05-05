@@ -24,12 +24,12 @@
 namespace gapbind14 {
   UInt T_GAPBIND14_OBJ = 0;
 
-  namespace {
+  Module &get_module() {
+    static Module MODULE;
+    return MODULE;
+  }
 
-    Module &get_module() {
-      static Module MODULE;
-      return MODULE;
-    }
+  namespace {
 
     Obj TheTypeTGapBind14Obj;
 

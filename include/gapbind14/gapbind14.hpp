@@ -15,33 +15,65 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-//
-
-// Current limitations:
-// 1. Only permits single constructor
 
 // TODO
-// 1. Rename SubTypeSpec -> Subtype
-// 2. Rename Subtype -> SubtypeBase
-// 3. should be possible to use shared_ptr instead of raw ptrs
+// * Rename SubTypeSpec -> Subtype
+// * Rename Subtype -> SubtypeBase
+// * should be possible to use shared_ptr instead of raw ptrs inside the
+//    objects
+// * use unique_ptr instead of raw ptrs
+// * Allow return Fail instead of ErrorQuit in GAPBIND14_TRY
+// * Allow custom printing
 
 #ifndef INCLUDE_GAPBIND14_GAPBIND14_HPP_
 #define INCLUDE_GAPBIND14_GAPBIND14_HPP_
 
+#include <array>          // for array
 #include <functional>     // for function
 #include <sstream>        // for ostringstream
 #include <string>         // for string
 #include <tuple>          // for tuple
 #include <type_traits>    // for enable_if_t
+#include <typeinfo>       // for typeid
 #include <unordered_map>  // for unordered_map
 #include <unordered_set>  // for unordered_set
 #include <utility>        // for make_pair
 #include <vector>         // for vector
 
-#include "gap_include.hpp"  // for gmp
-#include "macros.hpp"       // for the macros
-#include "to_cpp.hpp"       // for to_cpp
-#include "to_gap.hpp"       // for to_gap
+#include "gap_include.hpp"   // for gmp
+#include "tame-free-fn.hpp"  // for tame free functions
+#include "tame-make.hpp"     // for tame member functions
+#include "tame-mem-fn.hpp"   // for tame constructors
+#include "to_cpp.hpp"        // for to_cpp
+#include "to_gap.hpp"        // for to_gap
+
+////////////////////////////////////////////////////////////////////////
+// Assertions
+////////////////////////////////////////////////////////////////////////
+
+#ifdef GAPBIND14_DEBUG
+#define GAPBIND14_ASSERT(x) assert(x)
+#else
+#define GAPBIND14_ASSERT(x)
+#endif
+
+////////////////////////////////////////////////////////////////////////
+// Macros
+////////////////////////////////////////////////////////////////////////
+
+#define GAPBIND14_STRINGIFY(x) #x
+#define GAPBIND14_TO_STRING(x) GAPBIND14_STRINGIFY(x)
+
+#define GAPBIND14_MODULE(name, module)                             \
+  ::gapbind14::Module module(GAPBIND14_TO_STRING(name));           \
+  static void         gapbind14_init_##name(::gapbind14::Module&); \
+                                                                   \
+  void ::gapbind14::GAPBIND14_MODULE_IMPL(gapbind14::Module& m) {  \
+    gapbind14_init_##name(m);                                      \
+    m.finalize();                                                  \
+  }                                                                \
+                                                                   \
+  void gapbind14_init_##name(::gapbind14::Module& variable)
 
 ////////////////////////////////////////////////////////////////////////
 // Typdefs for GAP
@@ -50,6 +82,7 @@
 typedef Obj (*GVarFunc)(/*arguments*/);
 
 namespace gapbind14 {
+
   ////////////////////////////////////////////////////////////////////////
   // Typdefs
   ////////////////////////////////////////////////////////////////////////
@@ -76,165 +109,6 @@ namespace gapbind14 {
     stm << n;
     return stm.str();
   }
-
-  ////////////////////////////////////////////////////////////////////////
-  // Overloading
-  ////////////////////////////////////////////////////////////////////////
-
-  template <typename... TArgs>
-  struct overload_cast_impl {
-    constexpr overload_cast_impl() {}
-
-    template <typename TReturn>
-    constexpr auto operator()(TReturn (*pf)(TArgs...)) const noexcept
-        -> decltype(pf) {
-      return pf;
-    }
-
-    template <typename TReturn, typename TClass>
-    constexpr auto operator()(TReturn (TClass::*pmf)(TArgs...),
-                              std::false_type = {}) const noexcept
-        -> decltype(pmf) {
-      return pmf;
-    }
-
-    template <typename TReturn, typename TClass>
-    constexpr auto operator()(TReturn (TClass::*pmf)(TArgs...)
-                                  const) const noexcept -> decltype(pmf) {
-      return pmf;
-    }
-  };
-
-  static constexpr auto const_ = std::true_type{};
-
-  template <typename... TArgs>
-  static constexpr overload_cast_impl<TArgs...> overload_cast = {};
-
-  ////////////////////////////////////////////////////////////////////////
-  // Function return type and parameter type info
-  ////////////////////////////////////////////////////////////////////////
-
-  // For parameter packs . . .
-  template <typename... TArgs>
-  struct Pack {
-    template <size_t i>
-    using get = std::tuple_element_t<i, std::tuple<TArgs...>>;
-  };
-
-  template <typename TReturnType, typename... TArgs>
-  struct CppFunctionBase {
-    using arg_count   = std::integral_constant<unsigned, sizeof...(TArgs)>;
-    using return_type = TReturnType;
-    using params_type = Pack<TArgs...>;
-
-    // Function pointers . . .
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (*f)(), TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) == 0, SFINAE> {
-      return f();
-    }
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (*f)(TArgs...), TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) != 0, SFINAE> {
-      return f(args...);
-    }
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(std::function<TReturnType(TArgs...)> f, TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) == 0, SFINAE> {
-      return f();
-    }
-  };
-
-  // Member functions . . .
-  template <typename TClass, typename TReturnType, typename... TArgs>
-  struct CppMemFnBase {
-    using arg_count   = std::integral_constant<unsigned, sizeof...(TArgs)>;
-    using return_type = TReturnType;
-    using params_type = Pack<TArgs...>;
-    using class_type  = TClass;
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (TClass::*mem_fn)(TArgs...),
-                    TClass* ptr,
-                    TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) != 0, SFINAE> {
-      return (ptr->*mem_fn)(args...);
-    }
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (TClass::*mem_fn)(TArgs...),
-                    TClass* ptr,
-                    TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) == 0, SFINAE> {
-      return (ptr->*mem_fn)();
-    }
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (TClass::*mem_fn)(TArgs...) const,
-                    TClass* ptr,
-                    TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) != 0, SFINAE> {
-      return (ptr->*mem_fn)(args...);
-    }
-
-    template <typename SFINAE = TReturnType>
-    auto operator()(TReturnType (TClass::*mem_fn)(TArgs...) const,
-                    TClass* ptr,
-                    TArgs... args)
-        -> std::enable_if_t<sizeof...(TArgs) == 0, SFINAE> {
-      return (ptr->*mem_fn)();
-    }
-  };
-
-  // Base declaration . . .
-  template <typename TSignature>
-  struct CppFunction {};
-
-  // Free functions . . .
-  template <typename TReturnType, typename... TArgs>
-  struct CppFunction<TReturnType(TArgs...)>
-      : CppFunctionBase<TReturnType, TArgs...> {};
-
-  // Function pointers . . .
-  template <typename TReturnType, typename... TArgs>
-  struct CppFunction<TReturnType (*)(TArgs...)>
-      : CppFunctionBase<TReturnType, TArgs...> {};
-
-  // Member functions . . .
-  template <typename TClass, typename TReturnType, typename... TArgs>
-  struct CppFunction<TReturnType (TClass::*)(TArgs...)>
-      : CppMemFnBase<TClass, TReturnType, TArgs...> {};
-
-  // Const member functions
-  template <typename TClass, typename TReturnType, typename... TArgs>
-  struct CppFunction<TReturnType (TClass::*)(TArgs...) const>
-      : CppMemFnBase<TClass, TReturnType, TArgs...> {};
-
-  // std::function objects
-  template <typename TReturnType, typename... TArgs>
-  struct CppFunction<std::function<TReturnType(TArgs...)>>
-      : CppFunctionBase<TReturnType, TArgs...> {};
-
-  // For convenience . . .
-  template <typename TFunctionType>
-  using returns_void
-      = std::is_void<typename CppFunction<TFunctionType>::return_type>;
-
-  template <typename TFunctionType>
-  using arg_count = typename CppFunction<TFunctionType>::arg_count;
-
-  ////////////////////////////////////////////////////////////////////////
-  // init - for constructors
-  ////////////////////////////////////////////////////////////////////////
-
-  template <typename TClass, typename... TArgs>
-  TClass* init(TArgs&&... params) {
-    return new TClass(std::forward<TArgs>(params)...);
-  }
-
-  void check_args(Obj args, size_t n);
 
   ////////////////////////////////////////////////////////////////////////
   // Subtype class - for polymorphism
@@ -272,6 +146,12 @@ namespace gapbind14 {
     virtual void load(Obj o) = 0;
     virtual void free(Obj o) = 0;
 
+    // FIXME
+    template <typename S, typename T>
+    bool is_same_subtype() {
+      return std::is_same<S, T>::value;
+    }
+
    private:
     std::string        _name;
     gapbind14_sub_type _subtype;
@@ -284,6 +164,8 @@ namespace gapbind14 {
   template <typename TClass>
   class SubTypeSpec : public Subtype {
    public:
+    using class_type = TClass;
+
     SubTypeSpec(std::string nm, gapbind14_sub_type sbtyp)
         : Subtype(nm, sbtyp) {}
 
@@ -316,6 +198,7 @@ namespace gapbind14 {
     void load(Obj o) override {
       GAPBIND14_ASSERT(obj_subtype(o) == obj_subtype());
       // ADDR_OBJ(o)[0] holds the subtype, and is loaded in the Module::load
+      // TODO move this into Subtype
       ADDR_OBJ(o)[1] = static_cast<Obj>(nullptr);
     }
 
@@ -406,7 +289,7 @@ namespace gapbind14 {
       if (it == _subtype_names.end()) {
         throw std::runtime_error("No subtype named " + subtype_name);
       }
-      return _subtype_names.find(subtype_name)->second;
+      return it->second;
     }
 
     const char* name(Obj o) {
@@ -416,6 +299,16 @@ namespace gapbind14 {
 
     gapbind14_sub_type subtype(Obj o) {
       return Subtype::obj_subtype(o);
+    }
+
+    template <typename Class>
+    gapbind14_sub_type subtype() {
+      auto it = _type_to_subtype.find(typeid(Class).hash_code());
+      if (it == _type_to_subtype.end()) {
+        throw std::runtime_error(std::string("No subtype for ")
+                                 + typeid(Class).name());
+      }
+      return it->second;
     }
 
     void load(Obj o) {
@@ -430,9 +323,8 @@ namespace gapbind14 {
     }
 
     template <typename TClass, typename TFunctionType>
-    Obj create(std::string const& subtype_name, Obj args) {
-      return static_cast<SubTypeSpec<TClass>*>(
-                 _subtypes.at(subtype(subtype_name)))
+    Obj create(gapbind14_sub_type st, Obj args) {
+      return static_cast<SubTypeSpec<TClass>*>(_subtypes.at(st))
           ->template create_obj<TFunctionType>(args);
     }
 
@@ -451,6 +343,7 @@ namespace gapbind14 {
     template <typename TClass>
     gapbind14_sub_type add_subtype(std::string nm) {
       _subtype_names.insert(std::make_pair(nm, _next_subtype));
+      _type_to_subtype.emplace(typeid(TClass).hash_code(), _next_subtype);
       _subtypes.push_back(new SubTypeSpec<TClass>(nm, _next_subtype));
       _next_subtype++;
       _mem_funcs.push_back(std::vector<StructGVarFunc>());
@@ -463,8 +356,7 @@ namespace gapbind14 {
                   Obj (*func)(TArgs...)) {
       static_assert(sizeof...(TArgs) > 0,
                     "there must be at least 1 parameter: Obj self");
-      // TODO(now) -> GAPBIND14_ASSERT -> static_assert
-      GAPBIND14_ASSERT(sizeof...(TArgs) <= 7);
+      static_assert(sizeof...(TArgs) <= 7, "TArgs must be at most 7");
       _funcs.push_back({copy_c_str(nm),
                         sizeof...(TArgs) - 1,
                         params(sizeof...(TArgs) - 1),
@@ -479,8 +371,7 @@ namespace gapbind14 {
                       Obj (*func)(TArgs...)) {
       static_assert(sizeof...(TArgs) > 1,
                     "there must be at least 1 parameter: Obj self, Obj arg1");
-      // TODO(now) -> GAPBIND14_ASSERT -> static_assert
-      GAPBIND14_ASSERT(sizeof...(TArgs) <= 7);
+      static_assert(sizeof...(TArgs) <= 7, "TArgs must be at most 7");
       _mem_funcs.at(subtype(sbtyp))
           .push_back({copy_c_str(nm),
                       sizeof...(TArgs) - 1,
@@ -523,13 +414,17 @@ namespace gapbind14 {
       return copy_c_str(source);
     }
 
-    std::vector<StructGVarFunc>                         _funcs;
-    std::vector<std::vector<StructGVarFunc>>            _mem_funcs;
-    std::string                                         _module_name;
+    std::vector<StructGVarFunc>              _funcs;
+    std::vector<std::vector<StructGVarFunc>> _mem_funcs;
+    std::string                              _module_name;
+    // TODO remove _next_subtype, it's just _subtypes.size()
     gapbind14_sub_type                                  _next_subtype;
     std::unordered_map<std::string, gapbind14_sub_type> _subtype_names;
     std::vector<Subtype*>                               _subtypes;
+    std::unordered_map<size_t, gapbind14_sub_type>      _type_to_subtype;
   };
+
+  Module& get_module();
 
   ////////////////////////////////////////////////////////////////////////
   // Forward declaration
@@ -539,20 +434,6 @@ namespace gapbind14 {
 
   void init_library(Module& m);
   void init_kernel(Module& m);
-
-  template <typename T>
-  Obj range_to_plist(T first, T last) {
-    size_t N      = std::distance(first, last);
-    Obj    result = NEW_PLIST((N == 0 ? T_PLIST_EMPTY : T_PLIST_HOM), N);
-    SET_LEN_PLIST(result, N);
-    size_t i = 1;
-    for (auto it = first; it != last; ++it) {
-      AssPlist(result,
-               i++,
-               to_gap<typename std::iterator_traits<T>::reference>()(*it));
-    }
-    return result;
-  }
 
   ////////////////////////////////////////////////////////////////////////
   // to_cpp - for gapbind14 gap objects
@@ -572,23 +453,105 @@ namespace gapbind14 {
     }
   };
 
-  /*template <typename TCppType>
-  struct to_gap<TCppType*, std::enable_if_t<IsGapBind14Type<TCppType>::value>> {
-    using cpp_type = TCppType;
-    static gap_tnum_type const gap_type;
-
-    Obj operator()(TCppType* x) {
-      return SubTypeSpec<std::decay_t<TCppType>>::new_bag(
-          reinterpret_cast<Obj>(x));
-    }
-  };*/
-
   template <typename TCppType>
   gap_tnum_type const
       to_cpp<TCppType,
              std::enable_if_t<IsGapBind14Type<TCppType>::value>>::gap_type
       = T_GAPBIND14_OBJ;
 
+  ////////////////////////////////////////////////////////////////////////
+  // Free functions
+  ////////////////////////////////////////////////////////////////////////
+
+  template <typename Wild>
+  static void InstallGlobalFunction(Module& m, char const* name, Wild f) {
+    size_t const n = all_wilds<Wild>().size();
+    all_wilds<Wild>().push_back(f);
+    m.add_func(__FILE__, name, get_tame<decltype(&tame<0, Wild>), Wild>(n));
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  // Tame constructor
+  ////////////////////////////////////////////////////////////////////////
+
+  template <size_t N, typename Class, typename Wild>
+  Obj tame_constructor(Obj self, Obj args) {
+    return get_module().create<Class, Wild>(get_module().subtype<Class>(),
+                                            args);
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  // Classes
+  ////////////////////////////////////////////////////////////////////////
+
+  template <typename... Args>
+  struct init {};
+
+  template <typename Class>
+  class class_ {
+   public:
+    class_(Module& m, std::string name)
+        : _module(m), _name(name), _subtype(_module.add_subtype<Class>(name)) {}
+
+    template <typename... Args>
+    class_& def(init<Args...> x, std::string name = "make") {
+      using Wild = decltype(&make<Class, Args...>);
+      _module.add_mem_func(
+          _name,
+          __FILE__,
+          name,
+          get_tame_constructor<Class,
+                               decltype(&tame_constructor<0, Class, Wild>),
+                               Wild>(_subtype));
+      return *this;
+    }
+
+    template <typename Wild>
+    auto def(char const* mem_fn_name, Wild f)
+        -> std::enable_if_t<std::is_member_function_pointer<Wild>::value,
+                            class_&> {
+      size_t const n = all_wild_mem_fns<Wild>().size();
+      all_wild_mem_fns<Wild>().push_back(f);
+      _module.add_mem_func(
+          _name,
+          __FILE__,
+          mem_fn_name,
+          get_tame_mem_fn<decltype(&tame_mem_fn<0, Wild>), Wild>(n));
+      return *this;
+    }
+
+    template <typename Wild>
+    auto def(char const* mem_fn_name, Wild f)
+        -> std::enable_if_t<!std::is_member_function_pointer<Wild>::value,
+                            class_&> {
+      size_t const n = all_wilds<Wild>().size();
+      all_wilds<Wild>().push_back(f);
+      _module.add_mem_func(_name,
+                           __FILE__,
+                           mem_fn_name,
+                           get_tame<decltype(&tame<0, Wild>), Wild>(n));
+      return *this;
+    }
+
+   private:
+    Module&            _module;
+    std::string        _name;
+    gapbind14_sub_type _subtype;
+  };
+
+  template <typename T>
+  Obj make_iterator(T first, T last) {
+    size_t N      = std::distance(first, last);
+    Obj    result = NEW_PLIST((N == 0 ? T_PLIST_EMPTY : T_PLIST_HOM), N);
+    SET_LEN_PLIST(result, N);
+    size_t i = 1;
+    for (auto it = first; it != last; ++it) {
+      AssPlist(result,
+               i++,
+               to_gap<typename std::iterator_traits<T>::reference>()(*it));
+    }
+    return result;
+  }
 }  // namespace gapbind14
 
 #endif  // INCLUDE_GAPBIND14_GAPBIND14_HPP_
