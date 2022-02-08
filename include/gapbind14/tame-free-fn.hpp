@@ -1,6 +1,6 @@
 //
 // gapbind14
-// Copyright (C) 2020-21 James D. Mitchell
+// Copyright (C) 2020-2022 James D. Mitchell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -209,6 +209,15 @@ namespace gapbind14 {
   ////////////////////////////////////////////////////////////////////////
   // Tame functions NOT returning void
   ////////////////////////////////////////////////////////////////////////
+
+  template <size_t N, typename Wild, typename TSFINAE = Obj>
+  auto tame(Obj self) -> std::enable_if_t<!returns_void<Wild>::value
+                                              && arg_count<Wild>::value == 0,
+                                          TSFINAE> {
+    using to_gap_type
+        = gapbind14::to_gap<typename gapbind14::CppFunction<Wild>::return_type>;
+    GAPBIND14_TRY(return to_gap_type()(wild<Wild>(N)()));
+  }
 
   template <size_t N, typename Wild, typename TSFINAE = Obj>
   auto tame(Obj self, Obj arg0)

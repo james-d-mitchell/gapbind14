@@ -1,6 +1,6 @@
 //
 // gapbind14
-// Copyright (C) 2020-21 James D. Mitchell
+// Copyright (C) 2020-2022 James D. Mitchell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace gapbind14 {
   ////////////////////////////////////////////////////////////////////////
 
   template <typename Wild>
-  auto& all_wild_mem_fns() {
+  auto &all_wild_mem_fns() {
     static std::vector<Wild> fs;
     return fs;
   }
@@ -64,11 +64,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     GAPBIND14_TRY(CppFunction<Wild>()(wild_mem_fn<Wild>(N), ptr));
     return 0L;
@@ -84,11 +84,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -107,11 +107,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -134,11 +134,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -164,11 +164,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -203,11 +203,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -246,11 +246,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -293,11 +293,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -339,11 +339,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_gap_type = to_gap<typename CppFunction<Wild>::return_type>;
     GAPBIND14_TRY(
@@ -360,11 +360,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -383,11 +383,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -411,11 +411,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -442,11 +442,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -482,11 +482,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -526,11 +526,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -574,11 +574,11 @@ namespace gapbind14 {
           "expected gapbind14 object but got %s!", (Int) TNAM_OBJ(arg0), 0L);
     }
 
-    // TODO figure out how to check that the subtype of arg0 is compatible with
-    // Wild
+    // TODO(later) figure out how to check that the subtype of arg0 is
+    // compatible with Wild
 
     using class_type = typename CppFunction<Wild>::class_type;
-    class_type* ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
+    class_type *ptr  = SubTypeSpec<class_type>::obj_cpp_ptr(arg0);
 
     using to_cpp_1_type =
         typename CppFunction<Wild>::params_type::template get<0>;
@@ -613,7 +613,7 @@ namespace gapbind14 {
 
   template <size_t N, typename Tame, typename Wild>
   struct static_push_back_mem_fns {
-    void operator()(std::vector<Tame>& v) {
+    void operator()(std::vector<Tame> &v) {
       v.push_back(&tame_mem_fn<N - 1, Wild>);
       static_push_back_mem_fns<N - 1, Tame, Wild>{}(v);
     }
@@ -621,7 +621,7 @@ namespace gapbind14 {
 
   template <typename Tame, typename Wild>
   struct static_push_back_mem_fns<0, Tame, Wild> {
-    void operator()(std::vector<Tame>& v) {
+    void operator()(std::vector<Tame> &v) {
       std::reverse(v.begin(), v.end());
     }
   };
@@ -634,7 +634,7 @@ namespace gapbind14 {
   }
 
   template <typename Tame, typename Wild>
-  auto& tame_mem_fns() {
+  auto &tame_mem_fns() {
     static std::vector<Tame> fs = init_tame_mem_fns<Tame, Wild>();
     return fs;
   }

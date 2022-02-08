@@ -64,7 +64,7 @@ namespace gapbind14 {
     }
 
     ////////////////////////////////////////////////////////////////////////
-    // Copied from gap/src/modules.c, should be exposed in header TODO
+    // Copied from gap/src/modules.c, should be exposed in header TODO(later)
     ////////////////////////////////////////////////////////////////////////
 
     static Obj ValidatedArgList(const char *name,
